@@ -33,3 +33,13 @@ INSERT INTO uber_request_logs VALUES (1,'2020-01-09','success', 70.59, 6.56,14.3
  from uber_request_logs group by mon),
  b as (select mon, d_p_d, lag(d_p_d) over (order by mon ) as p_p_d from a)
  select round(sqrt(avg(pow(d_p_d-p_p_d,2))),2) as RMSE from b
+
+--  You are given a table of product launches by company by year. 
+--  Write a query to count the net difference between the number of products companies launched in 2020 with the number of products companies launched in the previous year. 
+--  Output the name of the companies and a net difference of net products released for 2020 compared to the previous year.
+CREATE TABLE car_launches(year int, company_name varchar(15), product_name varchar(30));
+INSERT INTO car_launches VALUES(2019,'Toyota','Avalon'),(2019,'Toyota','Camry'),(2020,'Toyota','Corolla'),(2019,'Honda','Accord'),(2019,'Honda','Passport'),(2019,'Honda','CR-V'),(2020,'Honda','Pilot'),(2019,'Honda','Civic'),(2020,'Chevrolet','Trailblazer'),(2020,'Chevrolet','Trax'),(2019,'Chevrolet','Traverse'),(2020,'Chevrolet','Blazer'),(2019,'Ford','Figo'),(2020,'Ford','Aspire'),(2019,'Ford','Endeavour'),(2020,'Jeep','Wrangler');	
+
+with a as(select company_name,year,count(product_name) as pc from car_launches where year =2019 or year =2020 group by company_name,year),
+b as (select company_name, lag(pc,1,0) over(partition by company_name order by year) as p2019, pc,year from a)
+select company_name, pc-p2019 as net_diff from b where year =2020;
